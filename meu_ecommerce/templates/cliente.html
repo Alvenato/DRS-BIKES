@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1.9">
+    <title>Cadastro de Cliente</title>
+</head>
+<body>
+    <div class="wrapper">
+        <nav class="sidebar">
+            <div class="sidebar-logo-container">
+                <img src="{{ url_for('static', filename='images/logo2.png') }}" class="sidebar-logo" alt="Logo Menu" onerror="this.style.display='none'">
+            </div>
+            <h3 class="sidebar-title">PDV Control</h3>
+            <a href="/admin" class="nav-btn {% if active_page == 'admin' %}active{% endif %}">📊 Histórico de Vendas</a>
+            <a href="/cliente" class="nav-btn {% if active_page == 'cliente' %}active{% endif %}">👤 Cadastrar Cliente</a>
+            <a href="/produto" class="nav-btn {% if active_page == 'produto' %}active{% endif %}">📦 Cadastrar Produto</a>
+            <a href="/caixa" class="nav-btn {% if active_page == 'caixa' %}active{% endif %}">🛒 Frente de Caixa</a>
+            <a href="/logout" class="nav-btn logout">🚪 Sair</a>
+        </nav>
+        
+        <main class="content">
+            <h2>Cadastro Detalhado de Cliente</h2>
+            <form action="/add_cliente" method="POST" class="grid-form">
+                <input type="text" name="nome" placeholder="Nome Completo" required>
+                <input type="email" name="email" placeholder="E-mail Principal">
+                <input type="text" name="telefone" placeholder="Telefone Fixo">
+                <input type="text" name="whatsapp" placeholder="WhatsApp / Celular">
+                
+                <input type="text" id="cep" name="cep" placeholder="CEP" onblur="pesquisacep(this.value)" required>
+                <input type="text" id="logradouro" name="logradouro" placeholder="Logradouro">
+                <input type="text" id="numero" name="numero" placeholder="Número">
+                <input type="text" id="complemento" name="complemento" placeholder="Complemento">
+                <input type="text" id="bairro" name="bairro" placeholder="Bairro">
+                <input type="text" id="cidade" name="cidade" placeholder="Cidade">
+                <input type="text" id="uf" name="uf" placeholder="UF">
+                
+                <input type="date" name="data_nasc">
+                <select name="genero">
+                    <option value="M">Masculino</option>
+                    <option value="F">Feminino</option>
+                </select>
+                
+                <button type="submit" class="btn-submit">Salvar Registro</button>
+            </form>
+
+            <div class="clientes-cadastrados-container" style="margin-top: 40px;">
+                <h3 style="margin-bottom: 15px; color: #333;">Clientes Cadastrados</h3>
+                <div class="table-responsive" style="overflow-x: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <table class="table-clientes" style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr style="background-color: #f8f9fa;">
+                                <th style="padding: 12px 15px; border-bottom: 1px solid #eeeeee; color: #555; font-weight: 600;">Nome</th>
+                                <th style="padding: 12px 15px; border-bottom: 1px solid #eeeeee; color: #555; font-weight: 600;">E-mail</th>
+                                <th style="padding: 12px 15px; border-bottom: 1px solid #eeeeee; color: #555; font-weight: 600;">WhatsApp / Celular</th>
+                                <th style="padding: 12px 15px; border-bottom: 1px solid #eeeeee; color: #555; font-weight: 600;">Cidade/UF</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if clientes %}
+                                {% for cliente in clientes %}
+                                <tr style="transition: background-color 0.2s;">
+                                    <td style="padding: 12px 15px; border-bottom: 1px solid #eeeeee; font-size: 14px;">{{ cliente.nome }}</td>
+                                    <td style="padding: 12px 15px; border-bottom: 1px solid #eeeeee; font-size: 14px;">{{ cliente.email or '-' }}</td>
+                                    <td style="padding: 12px 15px; border-bottom: 1px solid #eeeeee; font-size: 14px;">{{ cliente.whatsapp or cliente.telefone or '-' }}</td>
+                                    <td style="padding: 12px 15px; border-bottom: 1px solid #eeeeee; font-size: 14px;">{{ cliente.cidade or '-' }}/{{ cliente.uf or '-' }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" style="padding: 20px; text-align: center; color: #888; font-style: italic;">Nenhum cliente cadastrado até o momento.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function meu_callback(conteudo) {
+            if (!("erro" in conteudo)) {
+                document.getElementById('logradouro').value=(conteudo.logradouro);
+                document.getElementById('bairro').value=(conteudo.bairro);
+                document.getElementById('cidade').value=(conteudo.localidade);
+                document.getElementById('uf').value=(conteudo.uf);
+            }
+        }
+        function pesquisacep(valor) {
+            var cep = valor.replace(/\D/g, '');
+            if (cep != "") {
+                var validacep = /^[0-9]{8}$/;
+                if(validacep.test(cep)) {
+                    var script = document.createElement('script');
+                    script.src = 'https://viacep.com.br/ws/'+ cep + '/json/?callback=meu_callback';
+                    document.body.appendChild(script);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
