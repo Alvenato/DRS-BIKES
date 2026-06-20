@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - PDV E-commerce</title>
+    <style>
+        /* Estilização rápida apenas para organização visual */
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4f9; }
+        .login-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 300px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; }
+        .form-group input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        .error-msg { color: red; font-size: 14px; margin-top: 10px; text-align: center; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <h2>Acessar Sistema</h2>
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="username">Usuário</label>
+            <input type="text" id="username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Senha</label>
+            <input type="password" id="password" required>
+        </div>
+        <button type="submit">Entrar</button>
+        <div id="errorMsg" class="error-msg">Usuário ou senha incorretos!</div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Impede a página de recarregar
+        
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        const errorMsg = document.getElementById('errorMsg');
+
+        // Lógica de autenticação idêntica à que estava no Flask
+        if (user === 'admin' && pass === 'admin') {
+            // Se for o primeiro acesso, manda para alterar senha
+            window.location.href = 'alterar_senha.html';
+        } else if (user === 'admin' && pass === '1234') { 
+            // Exemplo de senha alterada para ir direto ao painel
+            localStorage.setItem('logged_in', 'true');
+            window.location.href = 'admin.html';
+        } else {
+            // Exibe mensagem de erro caso erre as credenciais
+            errorMsg.style.display = 'block';
+        }
+    });
+</script>
+
+</body>
+</html>
