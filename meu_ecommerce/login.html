@@ -3,18 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1.9">
+    <link rel="stylesheet" href="static/css/style.css">
     <title>Login - PDV Control</title>
 </head>
 <body class="login-page">
     <div class="login-container">
-        <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo-center" alt="Logo Autenticação" onerror="this.style.display='none'">
-        <form action="/login" method="POST">
+        <img src="static/images/logo.png" class="logo-center" alt="Logo Autenticação" onerror="this.style.display='none'">
+        
+        <form id="form-login">
             <h2>Acesso ao Sistema</h2>
-            <input type="text" name="username" placeholder="Usuário" required>
-            <input type="password" name="password" placeholder="Senha" required>
+            
+            <div id="mensagem-erro" style="display: none; background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; font-weight: 600; text-align: center;">
+                ⚠️ Usuário ou senha incorretos!
+            </div>
+
+            <input type="text" id="username" placeholder="Usuário" required>
+            <input type="password" id="password" placeholder="Senha" required>
             <button type="submit" class="btn-block">Entrar</button>
         </form>
     </div>
+
+    <script>
+        document.getElementById('form-login').addEventListener('submit', function(event) {
+            event.preventDefault(); // Impede o recarregamento padrão do formulário
+            
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value;
+            const errorMsg = document.getElementById('mensagem-erro');
+
+            // Esconde a mensagem de erro a cada nova tentativa de submissão
+            errorMsg.style.display = 'none';
+
+            // Lógica de autenticação local para o GitHub Pages
+            if (user === 'admin' && pass === 'admin') {
+                // Cenário de primeiro acesso -> Força alteração de credenciais
+                window.location.href = 'alterar_senha.html';
+            } else if (user === 'admin' && pass === '1234') { 
+                // Cenário de acesso com a senha definida -> Salva a sessão no navegador
+                localStorage.setItem('logged_in', 'true');
+                window.location.href = 'admin.html';
+            } else {
+                // Manipulação direta do DOM para exibir o alerta vermelho de credenciais inválidas
+                errorMsg.style.display = 'block';
+            }
+        });
+    </script>
 </body>
 </html>
