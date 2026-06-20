@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1.9">
+    <title>Frente de Caixa</title>
+    <style>
+        .color-badge {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            vertical-align: middle;
+        }
+        .color-container-td {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-top: 6px;
+            min-height: 18px; 
+        }
+        table th, table td {
+            vertical-align: top; 
+            padding: 10px;
+        }
+        .prod-input-group {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+        .payment-group {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .payment-field {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <nav class="sidebar">
+            <div class="sidebar-logo-container">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="sidebar-logo">
+            </div>
+            <h3 class="sidebar-title">PDV Control</h3>
+            
+            <a href="/admin" class="nav-btn vendas {% if active_page == 'admin' %}active{% endif %}">Histórico de Vendas</a>
+            <a href="/cliente" class="nav-btn cliente {% if active_page == 'cliente' %}active{% endif %}">Cadastrar Cliente</a>
+            <a href="/produto" class="nav-btn produto {% if active_page == 'produto' %}active{% endif %}">Cadastrar Produto</a>
+            <a href="/caixa" class="nav-btn caixa {% if active_page == 'caixa' %}active{% endif %}">Frente de Caixa</a>
+            
+            <a href="/logout" class="nav-btn logout">Sair</a>
+        </nav>
+        
+        <main class="content">
+            <h2>Terminal Frente de Caixa (PDV)</h2>
+            
+            {% if error %}
+            <div style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 600;">
+                ⚠️ {{ error }}
+            </div>
+            {% endif %}
+
+            <div class="table-container">
+                <form action="/registrar_venda" method="POST" id="form-caixa">
+                    
+                    <div class="payment-group">
+                        <div class="payment-field">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px; font-size:14px; color: var(--text-dark);">Vincular Cliente à Nota:</label>
+                            <select name="nome_cliente" style="padding: 12px; width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; font-size:14px; color:var(--text-dark);">
+                                <option value="CONSUMIDOR NAO IDENTIFICADO">-- CONSUMIDOR NÃO IDENTIFICADO --</option>
+                                {% for c in clientes %}
+                                <option value="{{ c[0] }}">{{ c[0] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="payment-field">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px; font-size:14px; color: var(--text-dark);">Forma de Pagamento:</label>
+                            <select name="forma_pagamento" required style="padding: 12px; width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; font-size:14px; color:var(--text-dark); font-weight: 600;">
+                                <option value="Dinheiro">💵 Dinheiro</option>
+                                <option value="Pix" selected>⚡ Pix</option>
+                                <option value="Credito">💳 Cartão de Crédito</option>
+                                <option value="Debito">💳 Cartão de Débito</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 30px; margin-bottom: 15px; font-size: 18px;">Produtos Adicionados</h3>
+                    <table id="tabela-itens">
+                        <thead>
+                            <tr>
+                                <th>Produto / Descrição</th>
+                                <th style="width: 140px;">Quantidade</th>
+                                <th style="width: 160px;">Preço Unitário</th>
+                                <th style="width: 60px; text-align: center;">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="item-row">
+                                <td>
+                                    <div class="prod-input-group">
+                                        <input type="text" placeholder="Cód" class="prod-cod" onkeydown="tratarEnterCodigo(event, this)" onchange="buscarPorCodigo(this)" style="padding:10px; width:70px; border-radius:6px; border:1px solid var(--border-color); text-align:center; font-weight:600;">
+                                        
+                                        <select name="produtos[]" class="prod-select" onchange="atualizarItem(this)" required style="padding:10px; flex:1; border-radius:6px; border:1px solid var(--border-color); background:#fff;">
+                                            <option value="" data-id="" data-preco="0.00" data-estoque="0" data-cor-primaria="" data-cor-secundaria="">-- Selecione o item --</option>
+                                            {% for p in produtos %}
+                                            <option value="{{ p[1] }}" data-id="{{ p[0] }}" data-preco="{{ p[2] }}" data-estoque="{{ p[3] }}" data-cor-primaria="{{ p[4] if p[4] else '' }}" data-cor-secundaria="{{ p[5] if p[5] else '' }}">{{ p[1] }} (Estoque: {{ p[3] }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="color-container-td"></div>
+                                </td>
+                                <td>
+                                    <input type="number" name="qtd[]" class="prod-qtd" value="1" min="1" oninput="validarLimiteDisponivel(this)" onchange="calcularTotalGeral()" required style="padding:10px; width:110px; border-radius:6px; border:1px solid var(--border-color);">
+                                    <small class="estoque-aviso" style="display:block; color:var(--text-light); font-size:11px; margin-top:4px; font-weight:500;"></small>
+                                </td>
+                                <td><input type="text" name="preco[]" class="prod-preco" readonly style="padding:10px; width:130px; border-radius:6px; border:1px solid var(--border-color); background:#f1f5f9; font-weight:700; color:var(--text-dark);"></td>
+                                <td style="text-align: center; padding-top: 14px;"><button type="button" onclick="removerLinha(this)" style="background:rgba(239, 68, 68, 0.1); color:var(--danger); border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">✕</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <button type="button" onclick="adicionarLinha()" style="background: #eff6ff; color: var(--primary); border: none; padding: 12px 20px; border-radius: 8px; margin-top: 20px; cursor: pointer; font-weight: 600; font-size:14px;">+ Adicionar Item</button>
+
+                    <div style="margin-top: 35px; text-align: right; background: #f8fafc; padding: 25px; border-radius: 12px; border: 1px solid var(--border-color);">
+                        <span style="font-size: 24px; font-weight: 800; color: var(--text-dark); letter-spacing: -0.5px;">VALOR TOTAL DO PEDIDO: <span id="total-geral" style="color: var(--success); margin-left:10px;">R$ 0.00</span></span>
+                    </div>
+
+                    <button type="submit" class="btn-block" style="background: var(--success); margin-top: 25px; padding: 16px; font-size: 16px; font-weight:700; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); width:100%; border:none; border-radius:8px; color:#fff; cursor:pointer;">Concluir e Emitir NFC-e</button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function buscarPorCodigo(inputCod) {
+            var codigoDigitado = inputCod.value.trim();
+            var row = inputCod.closest('.item-row');
+            var select = row.querySelector('.prod-select');
+            var encontrado = false;
+
+            if (codigoDigitado === "") {
+                select.selectedIndex = 0;
+                atualizarItem(select);
+                return;
+            }
+
+            for (var i = 0; i < select.options.length; i++) {
+                var option = select.options[i];
+                var dataId = option.getAttribute('data-id');
+                
+                if (dataId && String(dataId).trim() === String(codigoDigitado)) {
+                    select.selectedIndex = i;
+                    encontrado = true;
+                    break;
+                }
+            }
+
+            if (!encontrado) {
+                alert("Produto com o código " + codigoDigitado + " não foi encontrado.");
+                inputCod.value = "";
+                select.selectedIndex = 0;
+            }
+
+            atualizarItem(select);
+        }
+
+        function tratarEnterCodigo(event, inputCod) {
+            if (event.key === "Enter") {
+                event.preventDefault(); 
+                buscarPorCodigo(inputCod); 
+            }
+        }
+
+        function atualizarItem(selectElement) {
+            var opcaoSelecionada = selectElement.options[selectElement.selectedIndex];
+            var preco = opcaoSelecionada.getAttribute('data-preco');
+            var estoqueMax = parseInt(opcaoSelecionada.getAttribute('data-estoque')) || 0;
+            var produtoId = opcaoSelecionada.getAttribute('data-id');
+            
+            var corPrimaria = opcaoSelecionada.getAttribute('data-cor-primaria');
+            var corSecundaria = opcaoSelecionada.getAttribute('data-cor-secundaria');
+            
+            var row = selectElement.closest('.item-row');
+            var inputQtd = row.querySelector('.prod-qtd');
+            var avisoEstoque = row.querySelector('.estoque-aviso');
+            var containerCores = row.querySelector('.color-container-td');
+            var inputCod = row.querySelector('.prod-cod');
+            
+            if (inputCod) {
+                inputCod.value = produtoId || "";
+            }
+
+            row.querySelector('.prod-preco').value = preco ? parseFloat(preco).toFixed(2) : "0.00";
+            inputQtd.setAttribute('max', estoqueMax);
+            
+            containerCores.innerHTML = "";
+            
+            if (selectElement.value !== "") {
+                avisoEstoque.innerText = "Disponível: " + estoqueMax;
+                if(parseInt(inputQtd.value) > estoqueMax) {
+                    inputQtd.value = estoqueMax;
+                }
+                
+                if (corPrimaria && corPrimaria !== "") {
+                    containerCores.innerHTML += `<span class="color-badge" style="background-color: ${corPrimaria};" title="Cor Primária"></span>`;
+                }
+                if (corSecundaria && corSecundaria !== "") {
+                    containerCores.innerHTML += `<span class="color-badge" style="background-color: ${corSecundaria};" title="Cor Secundária"></span>`;
+                }
+            } else {
+                avisoEstoque.innerText = "";
+            }
+            
+            calcularTotalGeral();
+        }
+
+        function validarLimiteDisponivel(inputElement) {
+            var maximo = parseInt(inputElement.getAttribute('max')) || 0;
+            var valorAtual = parseInt(inputElement.value) || 0;
+            
+            if (valorAtual > maximo) {
+                alert("Atenção: Quantidade inserida é maior do que o saldo atual em estoque (" + maximo + ").");
+                inputElement.value = maximo;
+            }
+        }
+
+        function adicionarLinha() {
+            var tbody = document.querySelector('#tabela-itens tbody');
+            var primeiraLinha = document.querySelector('.item-row');
+            var novaLinha = primeiraLinha.cloneNode(true);
+            
+            novaLinha.querySelector('.prod-cod').value = "";
+            novaLinha.querySelector('.prod-select').selectedIndex = 0;
+            novaLinha.querySelector('.prod-preco').value = "";
+            
+            var inputQtd = novaLinha.querySelector('.prod-qtd');
+            inputQtd.value = 1;
+            inputQtd.removeAttribute('max');
+            
+            novaLinha.querySelector('.estoque-aviso').innerText = "";
+            novaLinha.querySelector('.color-container-td').innerHTML = "";
+            
+            tbody.appendChild(novaLinha);
+        }
+
+        function removerLinha(btn) {
+            var linhas = document.querySelectorAll('.item-row');
+            if(linhas.length > 1) {
+                btn.closest('.item-row').remove();
+                calcularTotalGeral();
+            } else {
+                alert("A nota fiscal deve possuir ao menos um item de mercadoria.");
+            }
+        }
+
+        function calcularTotalGeral() {
+            var lines = document.querySelectorAll('.item-row');
+            var total = 0;
+            lines.forEach(function(row) {
+                var qtd = parseInt(row.querySelector('.prod-qtd').value) || 0;
+                var preco = parseFloat(row.querySelector('.prod-preco').value) || 0;
+                total += (qtd * preco);
+            });
+            document.getElementById('total-geral').innerText = "R$ " + total.toFixed(2);
+        }
+    </script>
+</body>
+</html>

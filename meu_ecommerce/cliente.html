@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.1">
+    <title>Cadastro de Cliente</title>
+</head>
+<body>
+    <div class="wrapper">
+        <nav class="sidebar">
+            <div class="sidebar-logo-container">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" class="sidebar-logo" alt="Logo Menu">
+            </div>
+            <h3 class="sidebar-title">PDV Control</h3>
+            
+            <a href="/admin" class="nav-btn vendas {% if active_page == 'admin' %}active{% endif %}">Histórico de Vendas</a>
+            <a href="/cliente" class="nav-btn cliente {% if active_page == 'cliente' %}active{% endif %}">Cadastrar Cliente</a>
+            <a href="/produto" class="nav-btn produto {% if active_page == 'produto' %}active{% endif %}">Cadastrar Produto</a>
+            <a href="/caixa" class="nav-btn caixa {% if active_page == 'caixa' %}active{% endif %}">Frente de Caixa</a>
+            
+            <a href="/logout" class="nav-btn logout">Sair</a>
+        </nav>
+        
+        <main class="content">
+            <h2>Cadastro Detalhado de Cliente</h2>
+            
+            <form action="/add_cliente" method="POST" class="grid-form">
+                <input type="text" name="nome" placeholder="Nome Completo" required>
+                <input type="email" name="email" placeholder="E-mail Principal">
+                <input type="text" name="telefone" placeholder="Telefone Fixo">
+                <input type="text" name="whatsapp" placeholder="WhatsApp / Celular">
+                
+                <input type="text" id="cep" name="cep" placeholder="CEP" onblur="pesquisacep(this.value)" required>
+                <input type="text" id="logradouro" name="logradouro" placeholder="Logradouro">
+                <input type="text" id="numero" name="numero" placeholder="Número">
+                <input type="text" id="complemento" name="complemento" placeholder="Complemento">
+                <input type="text" id="bairro" name="bairro" placeholder="Bairro">
+                <input type="text" id="cidade" name="cidade" placeholder="Cidade">
+                <input type="text" id="uf" name="uf" placeholder="UF">
+                
+                <input type="date" name="data_nasc">
+                <select name="genero">
+                    <option value="" disabled selected style="display:none;">Selecione o Gênero</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Feminino</option>
+                </select>
+                
+                <button type="submit" class="btn-submit">Salvar Registro</button>
+            </form>
+
+            <div class="clientes-cadastrados-container" style="margin-top: 40px;">
+                <h3 style="margin-bottom: 15px; color: var(--text-dark); font-weight: 600;">Clientes Cadastrados</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                                <th>WhatsApp / Celular</th>
+                                <th>Cidade/UF</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if clientes %}
+                                {% for cliente in clientes %}
+                                <tr>
+                                    <td>{{ cliente.nome }}</td>
+                                    <td>{{ cliente.email or '-' }}</td>
+                                    <td>{{ cliente.whatsapp or cliente.telefone or '-' }}</td>
+                                    <td>{{ cliente.cidade or '-' }}/{{ cliente.uf or '-' }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" style="padding: 20px; text-align: center; color: var(--text-light); font-style: italic;">Nenhum cliente cadastrado até o momento.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function meu_callback(conteudo) {
+            if (!("erro" in conteudo)) {
+                document.getElementById('logradouro').value=(conteudo.logradouro);
+                document.getElementById('bairro').value=(conteudo.bairro);
+                document.getElementById('cidade').value=(conteudo.localidade);
+                document.getElementById('uf').value=(conteudo.uf);
+            }
+        }
+        function pesquisacep(valor) {
+            var cep = valor.replace(/\D/g, '');
+            if (cep != "") {
+                var validacep = /^[0-9]{8}$/;
+                if(validacep.test(cep)) {
+                    var script = document.createElement('script');
+                    script.src = 'https://viacep.com.br/ws/'+ cep + '/json/?callback=meu_callback';
+                    document.body.appendChild(script);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

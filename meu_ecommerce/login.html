@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1.9">
+    <title>Login - PDV Control</title>
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo-center" alt="Logo Autenticação" onerror="this.style.display='none'">
+        <form action="/login" method="POST">
+            <h2>Acesso ao Sistema</h2>
+            <input type="text" name="username" placeholder="Usuário" required>
+            <input type="password" name="password" placeholder="Senha" required>
+            <button type="submit" class="btn-block">Entrar</button>
+        </form>
+    </div>
+</body>
+</html>

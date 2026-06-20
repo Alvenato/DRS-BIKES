@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de Gestão e Cupom Fiscal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <style>
+        body {
+            background: #f8fafc;
+            margin: 0;
+            padding: 40px 20px;
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 360px;
+            margin: 0 auto;
+        }
+
+        .title-screen {
+            text-align: center;
+            color: #334155;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        @media print {
+            body {
+                background: #ffffff !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: flex-start !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            body * {
+                visibility: hidden;
+            }
+            .cupom-fiscal-wrapper, .cupom-fiscal-wrapper * {
+                visibility: visible;
+            }
+            .cupom-fiscal-wrapper {
+                position: absolute !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                top: 0 !important;
+                width: 320px !important;
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        
+        {% if not modo_publico %}
+        <h2 class="title-screen no-print">Visualização do Cupom Fiscal</h2>
+        
+        <div class="no-print" style="margin-bottom: 15px; text-align: center;">
+            <button onclick="enviarLinkWhatsapp()" style="background: #25D366; color: white; border: none; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2); height: 48px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397 0 12.008 0c3.202.001 6.212 1.249 8.477 3.514 2.266 2.265 3.498 5.275 3.497 8.484-.004 6.657-5.34 12.004-11.951 12.004-.003 0-.005 0-.007 0-2.01-.001-3.99-.513-5.749-1.485L0 24zm6.103-3.726c1.611.956 3.188 1.459 4.749 1.461 5.4 0 9.786-4.39 9.789-9.795.002-2.617-1.015-5.079-2.864-6.929-1.85-1.85-4.311-2.866-6.93-2.867-5.405 0-9.792 4.39-9.795 9.797-.001 1.634.437 3.226 1.272 4.662l-.995 3.635 3.724-.964zm11.37-6.83c-.27-.134-1.601-.789-1.849-.878-.247-.089-.427-.134-.607.134-.18.271-.697.878-.854 1.057-.158.179-.315.201-.585.067-.27-.134-1.14-.422-2.172-1.343-.803-.715-1.345-1.597-1.503-1.866-.158-.27-.017-.415.118-.549.122-.121.27-.315.405-.472.135-.157.179-.27.27-.449.09-.179.045-.337-.023-.472-.067-.135-.607-1.462-.831-2.002-.219-.524-.441-.453-.607-.462-.157-.008-.337-.01-.517-.01s-.472.067-.719.337c-.247.27-.944.922-.944 2.247s.966 2.597 1.101 2.776c.135.179 1.902 2.904 4.609 4.073.644.279 1.147.446 1.54.572.647.205 1.237.176 1.701.107.518-.077 1.601-.653 1.826-1.282.225-.629.225-1.169.157-1.282-.067-.113-.247-.179-.517-.313z"/>
+                </svg>
+                Enviar Link do Cupom por WhatsApp
+            </button>
+        </div>
+        {% endif %}
+        
+        <div class="cupom-fiscal-wrapper" style="background: #ffffff; padding: 25px 20px; width: 320px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box;">
+            
+            <div class="center" style="text-align: center; font-family: 'Courier New', monospace; font-size: 11px; color: #000; line-height: 1.4;">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" style="display: block; margin: 0 auto 12px auto; max-width: 140px; max-height: 90px; object-fit: contain;" alt="Logo Cupom" onerror="this.style.display='none'">
+                <h3 style="margin: 0 0 6px 0; font-size: 12px; font-weight: bold; letter-spacing: -0.3px;">DEOCLECIANO RODRIGUES DA SILVA - ME</h3>
+                <p style="margin: 2px 0;">CNPJ: 26.785.852/0001-25</p>
+                <p style="margin: 2px 0;">RUA 8, QUADRA 41 - PARQUE MARAJÓ</p>
+                <p style="margin: 2px 0;">VALPARAÍSO, GO - FONE: (61) 9.9601-1533</p>
+                <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+                <p style="font-weight: bold; margin: 6px 0; font-size: 11px; padding: 0 5px;">DOCUMENTO AUXILIAR DA NOTA FISCAL DE CONSUMIDOR ELETRÔNICA</p>
+                <p style="font-size: 10px; margin: 2px 0; letter-spacing: 1px; font-weight: bold;">VALOR FISCAL INTERNO</p>
+            </div>
+
+            <div style="font-family: 'Courier New', monospace; font-size: 11px; color: #000;">
+                <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+                <p style="margin: 4px 0; display: flex; justify-content: space-between;"><span><strong>CONSUMIDOR:</strong></span> <span>{{ venda[1] }}</span></p>
+                <p style="margin: 4px 0; display: flex; justify-content: space-between;"><span><strong>EMISSÃO:</strong></span> <span>{{ venda[3] }}</span></p>
+                <p style="margin: 4px 0; display: flex; justify-content: space-between;"><span><strong>FORMA PAGTO:</strong></span> <span>{{ venda[5] }}</span></p>
+                <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+
+                <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'Courier New', monospace;">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left; border-bottom: 1px dashed #000; padding-bottom: 6px; font-weight: bold;">CÓD. DESCRIÇÃO</th>
+                            <th style="text-align: right; border-bottom: 1px dashed #000; padding-bottom: 6px; font-weight: bold; width: 45px;">QTD.</th>
+                            <th style="text-align: right; border-bottom: 1px dashed #000; padding-bottom: 6px; font-weight: bold; width: 45px;">UN</th>
+                            <th style="text-align: right; border-bottom: 1px dashed #000; padding-bottom: 6px; font-weight: bold; width: 55px;">TL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in itens %}
+                        <tr>
+                            <td style="padding: 5px 0; vertical-align: top; word-break: break-word;">
+                                <span style="margin-right: 6px;">{{ "%04d"|format(item[0]) }}</span>{{ item[2] }}
+                            </td>
+                            <td style="padding: 5px 0; text-align: right; vertical-align: top;">{{ item[3] }}UN</td>
+                            <td style="padding: 5px 0; text-align: right; vertical-align: top;">{{ "%.2f"|format(item[4]|float) }}</td>
+                            <td style="padding: 5px 0; text-align: right; vertical-align: top; font-weight: bold;">{{ "%.2f"|format((item[3]|float) * (item[4]|float)) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+                <div style="font-size: 14px; font-weight: bold; margin: 12px 0; font-family: 'Courier New', monospace;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="letter-spacing: 0.5px;">VALOR TOTAL R$</span>
+                        <span style="font-size: 16px;">{{ "%.2f"|format(venda[2]|float) }}</span>
+                    </div>
+                </div>
+                <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+
+                <div style="text-align: center; font-size: 10px; line-height: 1.4;">
+                    <p style="margin: 6px 0 4px 0; font-weight: bold;">Consulte pela chave de acesso em:</p>
+                    <p style="font-size: 11px; word-break: break-all; letter-spacing: 1.5px; margin: 6px 0; font-weight: bold; background: #f8fafc; padding: 6px; border-radius: 4px; border: 1px solid #f1f5f9;">
+                        {{ venda[4][:4] }} {{ venda[4][4:8] }} {{ venda[4][8:12] }} {{ venda[4][12:16] }} {{ venda[4][16:20] }}
+                    </p>
+                    
+                    <div style="background: #ffffff; padding: 6px; display: inline-block; margin: 10px 0; border: 1px solid #e2e8f0; border-radius: 4px;">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=ChaveNFCe_{{ venda[4] }}" style="display: block;" alt="QR Code">
+                    </div>
+                    
+                    <p style="margin: 8px 0 0 0; font-size: 11px; font-weight: bold; letter-spacing: 0.5px;">OBRIGADO E VOLTE SEMPRE!!!</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function enviarLinkWhatsapp() {
+            let foneBruto = "{{ venda[6] }}";
+            let foneLimpo = foneBruto.replace(/\D/g, '');
+            
+            if (foneLimpo.length < 10) {
+                let foneDigitado = prompt("WhatsApp não cadastrado. Insira o número com DDD:");
+                if (!foneDigitado) return;
+                foneLimpo = foneDigitado.replace(/\D/g, '');
+            }
+
+            if (!foneLimpo.startsWith('55') && foneLimpo.length >= 10) {
+                foneLimpo = '55' + foneLimpo;
+            }
+            
+            // Descobre o endereço IP/Domínio em que o sistema está rodando agora
+            let dominioAtual = window.location.origin;
+            
+            // Cria a URL perfeita do documento usando a chave gerada pelo Python
+            let urlCupom = dominioAtual + "/cupom/{{ venda[4] }}";
+            
+            // Monta a mensagem que o cliente final vai receber
+            let texto = encodeURIComponent("Olá! Obrigado pela preferência em nosso estabelecimento.\n\nAqui está o link direto para visualizar o seu Cupom Fiscal completo:\n\n" + urlCupom);
+            
+            // Abre o WhatsApp diretamente encaminhando o link
+            window.open("https://wa.me/" + foneLimpo + "?text=" + texto, "_blank");
+        }
+    </script>
+
+</body>
+</html>

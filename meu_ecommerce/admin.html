@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1.9">
+    <title>Painel - Vendas</title>
+    <style>
+        .filter-container { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
+        .actions-cell { display: flex; gap: 8px; align-items: center; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <nav class="sidebar">
+            <div class="sidebar-logo-container">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="sidebar-logo">
+            </div>
+            <h3 class="sidebar-title">PDV Control</h3>
+            
+            <a href="/admin" class="nav-btn vendas active">Histórico de Vendas</a>
+            <a href="/cliente" class="nav-btn cliente">Cadastro de Cliente</a>
+            <a href="/produto" class="nav-btn produto">Cadastrar Produto</a>
+            <a href="/caixa" class="nav-btn caixa">Frente de Caixa</a>
+            
+            <a href="/logout" class="nav-btn logout">Sair</a>
+        </nav>
+        
+        <main class="content">
+            <h2>Visão Geral do Negócio</h2>
+            <div class="dashboard-grid">
+                <div class="card-metric"><h4>Total Vendas</h4><p>{{ total_vendas }}</p></div>
+                <div class="card-metric"><h4>Faturamento</h4><p style="color: #10b981;">R$ {{ "%.2f"|format(faturamento_total|default(0.0)) }}</p></div>
+                <div class="card-metric"><h4>Dinheiro</h4><p>R$ {{ "%.2f"|format(faturamento_dinheiro|default(0.0)) }}</p></div>
+                <div class="card-metric"><h4>PIX</h4><p>R$ {{ "%.2f"|format(faturamento_pix|default(0.0)) }}</p></div>
+                <div class="card-metric"><h4>Crédito</h4><p>R$ {{ "%.2f"|format(faturamento_credito|default(0.0)) }}</p></div>
+                <div class="card-metric"><h4>Débito</h4><p>R$ {{ "%.2f"|format(faturamento_debito|default(0.0)) }}</p></div>
+            </div>
+
+            <div class="filter-container" style="background: white;">
+                <form method="GET" action="/admin" class="filter-form" style="display:flex; gap: 10px; align-items: flex-end;">
+                    <div class="filter-group">
+                        <label>Dia:</label>
+                        <select name="dia" class="filter-input">
+                            <option value="">--</option>
+                            {% for d in range(1, 32) %}<option value="{{ '%02d'%d }}" {% if request.args.get('dia') == '%02d'%d %}selected{% endif %}>{{ '%02d'%d }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Mês:</label>
+                        <select name="mes" class="filter-input">
+                            <option value="">--</option>
+                            {% for m in range(1, 13) %}<option value="{{ '%02d'%m }}" {% if request.args.get('mes') == '%02d'%m %}selected{% endif %}>{{ '%02d'%m }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Ano:</label>
+                        <select name="ano" class="filter-input">
+                            <option value="">----</option>
+                            {% for y in range(2024, 2031) %}<option value="{{ y }}" {% if request.args.get('ano') == y|string %}selected{% endif %}>{{ y }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-filter" style="padding: 10px 20px;">Filtrar</button>
+                    <a href="/admin" class="btn-clear" style="padding: 10px 20px; text-decoration: none;">Limpar</a>
+                </form>
+            </div>
+
+            <h2>Histórico Geral de Vendas</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Cliente</th>
+                            <th>Data</th>
+                            <th>Chave NFC-e</th>
+                            <th>Valor</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for v in vendas %}
+                        <tr>
+                            <td>#{{ v['id'] }}</td>
+                            <td>{{ v['cliente'] }}</td>
+                            <td>{{ v['data'] }}</td>
+                            <td style="font-family: monospace; font-size: 12px;">{{ v['chave_nfce'] }}</td>
+                            <td>R$ {{ "%.2f"|format(v['valor']|float) }}</td>
+                            <td>
+                                <div class="actions-cell">
+                                    <a href="/emitir_cupom/{{ v['id'] }}" style="background: #2563eb; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; text-decoration: none; font-size: 13px; inline-size: max-content; display: inline-block;">Emitir Cupom</a>
+                                    
+                                    <form action="/remover_venda/{{ v['id'] }}" method="POST" onsubmit="return confirm('Tem certeza que deseja apagar o registro desta venda? Esta ação não pode ser desfeita.');" style="margin: 0;">
+                                        <button type="submit" class="btn-delete">Excluir</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

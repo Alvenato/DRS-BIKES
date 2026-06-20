@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1.9">
+    <title>Primeiro Acesso - Alterar Senha</title>
+</head>
+<body class="login-page">
+    <div class="login-container" style="width: 400px;">
+        <h2>Primeiro Acesso Detectado</h2>
+        <p style="color: var(--text-light); font-size: 13px; margin-bottom: 20px;">Por medidas de segurança, você deve alterar a senha padrão (admin) antes de continuar.</p>
+        
+        {% if error %}
+            <p style="color: var(--danger); font-weight: 600; font-size: 14px; margin-bottom: 15px;">⚠️ {{ error }}</p>
+        {% endif %}
+
+        <form action="/alterar_senha" method="POST">
+            <input type="password" name="nova_senha" placeholder="Digite sua Nova Senha" required style="width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid var(--border-color); box-sizing: border-box;">
+            <input type="password" name="confirmar_senha" placeholder="Confirme a Nova Senha" required style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--border-color); box-sizing: border-box;">
+            <button type="submit" class="btn-block" style="background: var(--success);">Salvar Nova Senha e Entrar</button>
+        </form>
+    </div>
+</body>
+</html>
