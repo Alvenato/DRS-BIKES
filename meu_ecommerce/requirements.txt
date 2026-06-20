@@ -3,4 +3,3 @@ gspread
 google-auth
 gunicorn
 python-dotenv
-pip-system-certs
