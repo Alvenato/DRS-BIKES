@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1.9">
+    <link rel="stylesheet" href="static/css/style.css">
     <title>Cadastro de Produtos</title>
     <style>
         /* Estilos para o botão de excluir na tabela */
@@ -114,16 +114,16 @@
     <div class="wrapper">
         <nav class="sidebar">
             <div class="sidebar-logo-container">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" class="sidebar-logo" alt="Logo Menu">
+                <img src="static/images/logo.png" class="sidebar-logo" alt="Logo Menu">
             </div>
             <h3 class="sidebar-title">PDV Control</h3>
             
-            <a href="/admin" class="nav-btn vendas {% if active_page == 'admin' %}active{% endif %}">Histórico de Vendas</a>
-            <a href="/cliente" class="nav-btn cliente {% if active_page == 'cliente' %}active{% endif %}">Cadastrar Cliente</a>
-            <a href="/produto" class="nav-btn produto {% if active_page == 'produto' %}active{% endif %}">Cadastrar Produto</a>
-            <a href="/caixa" class="nav-btn caixa {% if active_page == 'caixa' %}active{% endif %}">Frente de Caixa</a>
+            <a href="admin.html" class="nav-btn vendas">Histórico de Vendas</a>
+            <a href="cliente.html" class="nav-btn cliente">Cadastrar Cliente</a>
+            <a href="produto.html" class="nav-btn produto active">Cadastrar Produto</a>
+            <a href="caixa.html" class="nav-btn caixa">Frente de Caixa</a>
             
-            <a href="/logout" class="nav-btn logout">Sair</a>
+            <a href="index.html" class="nav-btn logout">Sair</a>
         </nav>
         
         <main class="content">
@@ -133,16 +133,16 @@
                 <div>
                     <div class="table-container">
                         <h3 style="margin-top:0; margin-bottom: 20px; font-size:18px;">Entrada de Item</h3>
-                        <form action="/add_produto" method="POST" id="formProduto" style="display: flex; flex-direction: column; gap: 15px;">
+                        <form id="formProduto" style="display: flex; flex-direction: column; gap: 15px;">
                             
                             <label style="font-weight: 600; font-size: 13px; color: var(--text-dark);">Nome Comercial:</label>
-                            <input type="text" name="nome" placeholder="Ex: Refrigerante Lata 350ml" required style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
+                            <input type="text" id="nome" placeholder="Ex: Refrigerante Lata 350ml" required style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
                             
                             <label style="font-weight: 600; font-size: 13px; color: var(--text-dark);">Preço de Venda (R$):</label>
-                            <input type="number" step="0.01" name="preco" placeholder="0.00" required style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
+                            <input type="number" step="0.01" id="preco" placeholder="0.00" required style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
                             
                             <label style="font-weight: 600; font-size: 13px; color: var(--text-dark);">Quantidade inicial:</label>
-                            <input type="number" name="quantidade" placeholder="Ex: 10" min="0" required style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
+                            <input type="number" id="quantidade" placeholder="Ex: 10" min="0" required style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
                             
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                                 <div style="display: flex; flex-direction: column; gap: 5px;">
@@ -150,7 +150,7 @@
                                     <div class="color-picker-wrapper">
                                         <input type="checkbox" id="check_primaria" title="Ativar cor primária">
                                         <input type="color" id="picker_primaria" value="#3b82f6" class="input-color-map color-disabled">
-                                        <input type="hidden" name="cor_primaria" id="cor_primaria_final" value="">
+                                        <input type="hidden" id="cor_primaria_final" value="">
                                     </div>
                                 </div>
 
@@ -159,7 +159,7 @@
                                     <div class="color-picker-wrapper">
                                         <input type="checkbox" id="check_secundaria" title="Ativar cor secundária">
                                         <input type="color" id="picker_secundaria" value="#ef4444" class="input-color-map color-disabled">
-                                        <input type="hidden" name="cor_secundaria" id="cor_secundaria_final" value="">
+                                        <input type="hidden" id="cor_secundaria_final" value="">
                                     </div>
                                 </div>
                             </div>
@@ -182,47 +182,8 @@
                                     <th class="text-center">Ações</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {% for p in produtos %}
-                                <tr>
-                                    <td><span style="color: var(--text-light); font-weight:500;">#{{ "%04d"|format(p[0]) }}</span></td>
-                                    <td>
-                                        <span style="font-weight:600; display: block;">{{ p[1] }}</span>
-                                        
-                                        {% if (p[4] and p[4] != "") or (p[5] and p[5] != "") %}
-                                        <div class="color-container-td">
-                                            {% if p[4] and p[4] != "" %}
-                                                <span class="color-badge" style="background-color: {{ p[4] }};" title="Cor Primária: {{ p[4] }}"></span>
-                                            {% endif %}
-                                            {% if p[5] and p[5] != "" %}
-                                                <span class="color-badge" style="background-color: {{ p[5] }};" title="Cor Secundária: {{ p[5] }}"></span>
-                                            {% endif %}
-                                        </div>
-                                        {% endif %}
-                                    </td>
-                                    <td style="font-weight: 700; color: var(--success);">R$ {{ "%.2f"|format(p[2]|float) }}</td>
-                                    
-                                    <td style="font-weight: 600;">
-                                        {% if p[3]|int > 0 %}
-                                            <span style="color: var(--text-dark);">{{ p[3] }} un</span>
-                                        {% else %}
-                                            <span class="badge-esgotado">Esgotado</span>
-                                        {% endif %}
-                                    </td>
-                                    
-                                    <td class="text-center">
-                                        <form action="/remover_produto" method="POST" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja remover este produto do estoque?');">
-                                            <input type="hidden" name="produto_id" value="{{ p[0] }}">
-                                            <button type="submit" class="btn-delete">Remover do Estoque</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                {% else %}
-                                <tr>
-                                    <td colspan="5" style="text-align: center; color: var(--text-light); padding: 20px 0;">Nenhum produto cadastrado até o momento.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
+                            <tbody id="lista-produtos">
+                                </tbody>
                         </table>
                     </div>
                 </div>
@@ -232,6 +193,108 @@
     </div>
 
     <script>
+        // --- BANCO DE DADOS DE SIMULAÇÃO (MOCK) ---
+        const mockProdutos = [
+            { id: 1, nome: "Refrigerante Lata 350ml", preco: 5.50, quantidade: 24, corPrimaria: "#3b82f6", corSecundaria: "#ef4444" },
+            { id: 2, nome: "Água Mineral Sem Gás 500ml", preco: 3.00, quantidade: 50, corPrimaria: "#06b6d4", corSecundaria: "" },
+            { id: 3, nome: "Salgado Assado Integral", preco: 8.50, quantidade: 0, corPrimaria: "", corSecundaria: "" }
+        ];
+
+        let proximoId = 4; // Incrementador de IDs para novos registros
+
+        // --- INICIALIZAÇÃO E RENDERIZAÇÃO DA TABELA ---
+        document.addEventListener("DOMContentLoaded", function() {
+            renderizarTabela();
+        });
+
+        function renderizarTabela() {
+            const tbody = document.getElementById('lista-produtos');
+            tbody.innerHTML = ""; // Limpa os registros anteriores
+
+            if (mockProdutos.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-light); padding: 20px 0;">Nenhum produto cadastrado até o momento.</td>
+                    </tr>`;
+                return;
+            }
+
+            mockProdutos.forEach(p => {
+                const tr = document.createElement('tr');
+                
+                // Formatação do ID com zeros à esquerda (#0001)
+                const codigoFormatado = `#${String(p.id).padStart(4, '0')}`;
+                
+                // Estruturação das tags de cores se elas existirem no objeto
+                let badgesCores = '';
+                if (p.corPrimaria || p.corSecundaria) {
+                    badgesCores = `<div class="color-container-td">`;
+                    if (p.corPrimaria) {
+                        badgesCores += `<span class="color-badge" style="background-color: ${p.corPrimaria};" title="Cor Primária: ${p.corPrimaria}"></span>`;
+                    }
+                    if (p.corSecundaria) {
+                        badgesCores += `<span class="color-badge" style="background-color: ${p.corSecundaria};" title="Cor Secundária: ${p.corSecundaria}"></span>`;
+                    }
+                    badgesCores += `</div>`;
+                }
+
+                // Badge dinâmico de quantidade esgotada
+                const estoqueHtml = p.quantidade > 0 ? `${p.quantidade} un` : `<span class="badge-esgotado">Esgotado</span>`;
+
+                tr.innerHTML = `
+                    <td><span style="color: var(--text-light); font-weight:500;">${codigoFormatado}</span></td>
+                    <td>
+                        <span style="font-weight:600; display: block;">${p.nome}</span>
+                        ${badgesCores}
+                    </td>
+                    <td style="font-weight: 700; color: var(--success);">R$ ${parseFloat(p.preco).toFixed(2)}</td>
+                    <td style="font-weight: 600;">${estoqueHtml}</td>
+                    <td class="text-center">
+                        <button class="btn-delete" onclick="removerProduto(${p.id})">Remover do Estoque</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- SISTEMA DE CADASTRO (INTERCEPTADOR) ---
+        document.getElementById('formProduto').addEventListener('submit', function(event) {
+            event.preventDefault(); // Impede o envio para rotas de servidor
+
+            // Coleta os valores finais com base no estado das checkboxes
+            const corPrimariaFinal = checkPrimaria.checked ? pickerPrimaria.value : "";
+            const corSecundariaFinal = checkSecundaria.checked ? pickerSecundaria.value : "";
+
+            const novoProduto = {
+                id: proximoId++,
+                nome: document.getElementById('nome').value.trim(),
+                preco: parseFloat(document.getElementById('preco').value),
+                quantidade: parseInt(document.getElementById('quantidade').value, 10),
+                corPrimaria: corPrimariaFinal,
+                corSecundaria: corSecundariaFinal
+            };
+
+            // Insere no nosso array mock e reconstrói a tabela
+            mockProdutos.push(novoProduto);
+            renderizarTabela();
+
+            // Reseta o formulário e os estados de cores
+            document.getElementById('formProduto').reset();
+            desativarPickers();
+        });
+
+        // --- SISTEMA DE REMOÇÃO LOCAL ---
+        function removerProduto(id) {
+            if (confirm('Tem certeza que deseja remover este produto do estoque?')) {
+                const index = mockProdutos.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    mockProdutos.splice(index, 1);
+                    renderizarTabela();
+                }
+            }
+        }
+
+        // --- LÓGICA DO SELETOR DE CORES DINÂMICO (Mantido de forma otimizada) ---
         const checkPrimaria = document.getElementById('check_primaria');
         const pickerPrimaria = document.getElementById('picker_primaria');
         const hiddenPrimaria = document.getElementById('cor_primaria_final');
@@ -240,7 +303,13 @@
         const pickerSecundaria = document.getElementById('picker_secundaria');
         const hiddenSecundaria = document.getElementById('cor_secundaria_final');
 
-        // Alternar estado do seletor Primário
+        function desativarPickers() {
+            pickerPrimaria.classList.add('color-disabled');
+            hiddenPrimaria.value = "";
+            pickerSecundaria.classList.add('color-disabled');
+            hiddenSecundaria.value = "";
+        }
+
         checkPrimaria.addEventListener('change', function() {
             if(this.checked) {
                 pickerPrimaria.classList.remove('color-disabled');
@@ -255,7 +324,6 @@
             if(checkPrimaria.checked) hiddenPrimaria.value = this.value;
         });
 
-        // Alternar estado do seletor Secundário
         checkSecundaria.addEventListener('change', function() {
             if(this.checked) {
                 pickerSecundaria.classList.remove('color-disabled');
@@ -268,12 +336,6 @@
 
         pickerSecundaria.addEventListener('input', function() {
             if(checkSecundaria.checked) hiddenSecundaria.value = this.value;
-        });
-
-        // Garante a limpeza dos inputs ocultos antes do envio se os checkboxes estiverem desmarcados
-        document.getElementById('formProduto').addEventListener('submit', function() {
-            if (!checkPrimaria.checked) hiddenPrimaria.value = "";
-            if (!checkSecundaria.checked) hiddenSecundaria.value = "";
         });
     </script>
 </body>
