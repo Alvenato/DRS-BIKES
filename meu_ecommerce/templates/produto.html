@@ -94,12 +94,15 @@
                             <tbody>
                                 {% for p in produtos %}
                                 <tr>
-                                    <td><span style="color: #666; font-weight:500;">#{{ "%04d"|format(p.id) }}</span></td>
+                                    <td>
+                                        {% if p.codigo_barras %}
+                                        <span style="font-family:monospace; font-weight:600; color:#1e293b; font-size:13px;">{{ p.codigo_barras }}</span>
+                                        {% else %}
+                                        <span style="color:#94a3b8; font-size:12px;">Sem EAN</span>
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         <span style="font-weight:600; display: block;">{{ p.nome }}</span>
-                                        {% if p.codigo_barras %}
-                                        <span style="font-size:11px; color:#64748b; font-family:monospace;">{{ p.codigo_barras }}</span>
-                                        {% endif %}
                                         <div class="color-container-td">
                                             {% if p.cor_primaria %}<span class="color-badge" style="background-color: {{ p.cor_primaria }};"></span>{% endif %}
                                             {% if p.cor_secundaria %}<span class="color-badge" style="background-color: {{ p.cor_secundaria }};"></span>{% endif %}
