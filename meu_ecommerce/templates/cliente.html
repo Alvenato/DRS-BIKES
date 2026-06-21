@@ -82,7 +82,7 @@
                                     <td>{{ cliente.whatsapp or cliente.telefone or '-' }}</td>
                                     <td>{{ cliente.cidade or '-' }}/{{ cliente.uf or '-' }}</td>
                                     <td style="text-align:center; white-space:nowrap;">
-                                        <button onclick="editarCliente({{ cliente | tojson }})" style="background:#2563eb; color:#fff; border:none; border-radius:6px; padding:5px 12px; font-size:12px; font-weight:600; cursor:pointer; margin-right:4px;">✏️ Editar</button>
+                                        <button onclick='editarCliente({{ cliente | tojson }})' style="background:#2563eb; color:#fff; border:none; border-radius:6px; padding:5px 12px; font-size:12px; font-weight:600; cursor:pointer; margin-right:4px;">✏️ Editar</button>
                                         <form method="POST" action="/cliente/{{ cliente.id }}/excluir" style="display:inline;" onsubmit="return confirm('Excluir {{ cliente.nome }}?')">
                                             <button type="submit" style="background:#ef4444; color:#fff; border:none; border-radius:6px; padding:5px 12px; font-size:12px; font-weight:600; cursor:pointer;">🗑️ Excluir</button>
                                         </form>
