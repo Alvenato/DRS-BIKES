@@ -50,23 +50,29 @@ _worksheet_cache = {}
 # ─────────────────────────── CONEXÃO ───────────────────────────────────────
 
 def _load_credentials():
-    # Opção 1 (uso local, mais simples): caminho para o arquivo credentials.json
+    # Coleta candidatos a JSON — aceita qualquer variável que contenha um JSON
+    raw = _cfg("GOOGLE_CREDENTIALS_JSON")
+    if not (raw and raw.strip().startswith('{')):
+        # Fallback: talvez o JSON foi colado na variável errada
+        alt = _cfg("GOOGLE_APPLICATION_CREDENTIALS_FILE")
+        if alt and alt.strip().startswith('{'):
+            raw = alt
+
+    if raw and raw.strip().startswith('{'):
+        info = json.loads(raw)
+        return Credentials.from_service_account_info(info, scopes=SCOPES)
+
+    # Uso local: GOOGLE_APPLICATION_CREDENTIALS_FILE aponta para um arquivo .json
     file_path = _cfg("GOOGLE_APPLICATION_CREDENTIALS_FILE")
-    if file_path:
+    if file_path and not file_path.strip().startswith('{'):
         resolved = _BASE_DIR / file_path
         if not resolved.exists():
             raise RuntimeError(f"Arquivo de credenciais não encontrado em: {resolved}")
         return Credentials.from_service_account_file(str(resolved), scopes=SCOPES)
 
-    # Opção 2 (uso no Render/produção): conteúdo do JSON colado direto na variável
-    raw = _cfg("GOOGLE_CREDENTIALS_JSON")
-    if raw:
-        info = json.loads(raw)
-        return Credentials.from_service_account_info(info, scopes=SCOPES)
-
     raise RuntimeError(
-        "Defina GOOGLE_APPLICATION_CREDENTIALS_FILE (caminho para o credentials.json, uso local) "
-        "ou GOOGLE_CREDENTIALS_JSON (conteúdo do JSON inteiro, usado no Render)."
+        "Defina GOOGLE_CREDENTIALS_JSON (conteúdo do JSON da service account) "
+        "ou GOOGLE_APPLICATION_CREDENTIALS_FILE (caminho para o credentials.json local)."
     )
 
 
