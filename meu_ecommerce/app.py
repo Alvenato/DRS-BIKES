@@ -304,6 +304,27 @@ def cliente():
     return render_template('cliente.html', clientes=_clientes_cadastrados(), active_page='cliente')
 
 
+@app.route('/cliente/<int:cliente_id>/excluir', methods=['POST'])
+def excluir_cliente(cliente_id):
+    if 'logged_in' not in session:
+        return redirect(url_for('login'))
+    db.delete_row(SHEET_CLIENTES, 'id', cliente_id)
+    return redirect(url_for('cliente'))
+
+
+@app.route('/cliente/<int:cliente_id>/editar', methods=['POST'])
+def editar_cliente(cliente_id):
+    if 'logged_in' not in session:
+        return redirect(url_for('login'))
+    campos = ['id', 'nome', 'email', 'telefone', 'whatsapp', 'cep', 'logradouro',
+              'numero', 'complemento', 'bairro', 'cidade', 'uf', 'data_nasc', 'genero']
+    dados = {c: request.form.get(c, '').strip() for c in campos}
+    dados['id'] = cliente_id
+    db.delete_row(SHEET_CLIENTES, 'id', cliente_id)
+    db.append_row(SHEET_CLIENTES, campos, dados)
+    return redirect(url_for('cliente'))
+
+
 # ─────────────────────────── PRODUTOS ──────────────────────────────────────
 
 @app.route('/produto', methods=['GET', 'POST'])

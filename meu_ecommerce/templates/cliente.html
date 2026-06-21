@@ -60,6 +60,7 @@
                                 <th>E-mail</th>
                                 <th>WhatsApp / Celular</th>
                                 <th>Cidade/UF</th>
+                                <th style="width:130px; text-align:center;">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -70,11 +71,17 @@
                                     <td>{{ cliente.email or '-' }}</td>
                                     <td>{{ cliente.whatsapp or cliente.telefone or '-' }}</td>
                                     <td>{{ cliente.cidade or '-' }}/{{ cliente.uf or '-' }}</td>
+                                    <td style="text-align:center; white-space:nowrap;">
+                                        <button onclick="abrirEdicao({{ cliente | tojson }})" style="background:#2563eb; color:#fff; border:none; border-radius:6px; padding:5px 12px; font-size:12px; font-weight:600; cursor:pointer; margin-right:4px;">✏️ Editar</button>
+                                        <form method="POST" action="/cliente/{{ cliente.id }}/excluir" style="display:inline;" onsubmit="return confirm('Excluir {{ cliente.nome }}?')">
+                                            <button type="submit" style="background:#ef4444; color:#fff; border:none; border-radius:6px; padding:5px 12px; font-size:12px; font-weight:600; cursor:pointer;">🗑️ Excluir</button>
+                                        </form>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             {% else %}
                                 <tr>
-                                    <td colspan="4" style="padding: 20px; text-align: center; color: var(--text-light); font-style: italic;">Nenhum cliente cadastrado até o momento.</td>
+                                    <td colspan="5" style="padding: 20px; text-align: center; color: var(--text-light); font-style: italic;">Nenhum cliente cadastrado até o momento.</td>
                                 </tr>
                             {% endif %}
                         </tbody>
@@ -84,7 +91,55 @@
         </main>
     </div>
 
+    <!-- Modal de edição -->
+    <div id="modal-edicao" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:16px; padding:36px 32px; width:100%; max-width:600px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+            <h3 style="margin:0 0 24px; color:#1e293b; font-size:20px;">✏️ Editar Cliente</h3>
+            <form id="form-edicao" method="POST" class="grid-form">
+                <input type="hidden" name="id" id="edit-id">
+                <input type="text" name="nome" id="edit-nome" placeholder="Nome Completo" required>
+                <input type="email" name="email" id="edit-email" placeholder="E-mail">
+                <input type="text" name="telefone" id="edit-telefone" placeholder="Telefone Fixo">
+                <input type="text" name="whatsapp" id="edit-whatsapp" placeholder="WhatsApp / Celular">
+                <input type="text" name="cep" id="edit-cep" placeholder="CEP">
+                <input type="text" name="logradouro" id="edit-logradouro" placeholder="Logradouro">
+                <input type="text" name="numero" id="edit-numero" placeholder="Número">
+                <input type="text" name="complemento" id="edit-complemento" placeholder="Complemento">
+                <input type="text" name="bairro" id="edit-bairro" placeholder="Bairro">
+                <input type="text" name="cidade" id="edit-cidade" placeholder="Cidade">
+                <input type="text" name="uf" id="edit-uf" placeholder="UF">
+                <input type="date" name="data_nasc" id="edit-data_nasc">
+                <select name="genero" id="edit-genero">
+                    <option value="">Selecione o Gênero</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Feminino</option>
+                </select>
+                <div style="display:flex; gap:12px; grid-column:1/-1; margin-top:8px;">
+                    <button type="submit" class="btn-submit" style="flex:1; margin:0;">Salvar Alterações</button>
+                    <button type="button" onclick="fecharModal()" style="flex:1; padding:12px; background:#f1f5f9; color:#1e293b; border:1px solid #e2e8f0; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer;">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        function abrirEdicao(c) {
+            document.getElementById('form-edicao').action = '/cliente/' + c.id + '/editar';
+            ['id','nome','email','telefone','whatsapp','cep','logradouro','numero',
+             'complemento','bairro','cidade','uf','data_nasc','genero'].forEach(function(f) {
+                var el = document.getElementById('edit-' + f);
+                if (el) el.value = c[f] || '';
+            });
+            var modal = document.getElementById('modal-edicao');
+            modal.style.display = 'flex';
+        }
+        function fecharModal() {
+            document.getElementById('modal-edicao').style.display = 'none';
+        }
+        document.getElementById('modal-edicao').addEventListener('click', function(e) {
+            if (e.target === this) fecharModal();
+        });
+
         function meu_callback(conteudo) {
             if (!("erro" in conteudo)) {
                 document.getElementById('logradouro').value=(conteudo.logradouro);
