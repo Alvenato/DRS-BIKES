@@ -199,7 +199,7 @@
             }
 
             let dominioAtual = window.location.origin;
-            let urlCupom = dominioAtual + "/emitir_cupom/{{ venda['id'] }}";
+            let urlCupom = dominioAtual + "/consultar_chave?chave={{ venda['id'] }}";
 
             let texto = encodeURIComponent(
                 "Olá! Obrigado pela preferência em nosso estabelecimento.\n\n" +
