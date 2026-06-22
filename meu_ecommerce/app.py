@@ -208,6 +208,8 @@ def registrar_venda():
 
     cliente_nome = request.form.get('nome_cliente', NOME_CONSUMIDOR_PADRAO)
     forma_pagamento = request.form.get('forma_pagamento', '')
+    parcelas = request.form.get('parcelas', '1').strip()
+    data_primeira_parcela = request.form.get('data_primeira_parcela', '').strip()
     nomes_produtos = request.form.getlist('produtos[]')
     quantidades = request.form.getlist('qtd[]')
     precos = request.form.getlist('preco[]')
@@ -225,14 +227,29 @@ def registrar_venda():
     except (ValueError, ZeroDivisionError):
         total_venda = 0.0
 
+    # Data da venda: se crédito com 1ª parcela em data diferente, usa essa data
+    data_venda = datetime.datetime.now(BRT).strftime("%d/%m/%Y %H:%M")
+    if forma_pagamento == 'Credito' and data_primeira_parcela:
+        try:
+            dt_parcela = datetime.datetime.strptime(data_primeira_parcela, "%Y-%m-%d").date()
+            dt_hoje = datetime.datetime.now(BRT).date()
+            if dt_parcela != dt_hoje:
+                data_venda = dt_parcela.strftime("%d/%m/%Y")
+        except ValueError:
+            pass
+
+    forma_pagamento_label = forma_pagamento
+    if forma_pagamento == 'Credito' and parcelas and int(parcelas) > 1:
+        forma_pagamento_label = f"Credito {parcelas}x"
+
     novo_id = db.next_id(SHEET_VENDAS)
     db.append_row(SHEET_VENDAS, ['id', 'cliente', 'data', 'chave_nfce', 'valor', 'forma_pagamento'], {
         'id': novo_id,
         'cliente': cliente_nome,
-        'data': datetime.datetime.now(BRT).strftime("%d/%m/%Y %H:%M"),
+        'data': data_venda,
         'chave_nfce': chave_nfce,
         'valor': total_venda,
-        'forma_pagamento': forma_pagamento,
+        'forma_pagamento': forma_pagamento_label,
     })
 
     produtos_atuais = db.get_all_rows(SHEET_PRODUTOS)

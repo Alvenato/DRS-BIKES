@@ -83,12 +83,28 @@
 
                         <div class="payment-field">
                             <label style="font-weight: 600; display: block; margin-bottom: 8px; font-size:14px; color: var(--text-dark);">Forma de Pagamento:</label>
-                            <select name="forma_pagamento" required style="padding: 12px; width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; font-size:14px; color:var(--text-dark); font-weight: 600;">
+                            <select name="forma_pagamento" id="forma_pagamento" required onchange="toggleParcelamento(this.value)" style="padding: 12px; width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; font-size:14px; color:var(--text-dark); font-weight: 600;">
                                 <option value="Dinheiro">💵 Dinheiro</option>
                                 <option value="Pix" selected>⚡ Pix</option>
                                 <option value="Credito">💳 Cartão de Crédito</option>
                                 <option value="Debito">💳 Cartão de Débito</option>
                             </select>
+                        </div>
+                    </div>
+
+                    <!-- Campos de parcelamento — visíveis só no crédito -->
+                    <div id="bloco-parcelamento" style="display:none; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:16px 20px; margin-top:16px; display:none; gap:20px; flex-wrap:wrap;">
+                        <div style="flex:1; min-width:160px;">
+                            <label style="font-weight:600; font-size:13px; color:#1d4ed8; display:block; margin-bottom:6px;">Número de Parcelas:</label>
+                            <select name="parcelas" id="parcelas" style="padding:10px; width:100%; border-radius:8px; border:1px solid #bfdbfe; font-size:14px; font-weight:600; background:#fff;">
+                                {% for n in range(1, 13) %}
+                                <option value="{{ n }}">{{ n }}x</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div style="flex:1; min-width:160px;">
+                            <label style="font-weight:600; font-size:13px; color:#1d4ed8; display:block; margin-bottom:6px;">Data da 1ª Parcela:</label>
+                            <input type="date" name="data_primeira_parcela" id="data_primeira_parcela" style="padding:10px; width:100%; border-radius:8px; border:1px solid #bfdbfe; font-size:14px; font-weight:600; box-sizing:border-box;">
                         </div>
                     </div>
 
@@ -140,6 +156,22 @@
     </div>
 
     <script>
+        function toggleParcelamento(forma) {
+            var bloco = document.getElementById('bloco-parcelamento');
+            if (forma === 'Credito') {
+                bloco.style.display = 'flex';
+                // Preenche data de hoje como padrão
+                var hoje = new Date();
+                var yyyy = hoje.getFullYear();
+                var mm   = String(hoje.getMonth() + 1).padStart(2, '0');
+                var dd   = String(hoje.getDate()).padStart(2, '0');
+                var inputData = document.getElementById('data_primeira_parcela');
+                if (!inputData.value) inputData.value = yyyy + '-' + mm + '-' + dd;
+            } else {
+                bloco.style.display = 'none';
+            }
+        }
+
         function buscarPorCodigo(inputCod) {
             var codigoDigitado = inputCod.value.trim();
             var row = inputCod.closest('.item-row');
